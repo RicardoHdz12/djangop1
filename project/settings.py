@@ -31,14 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "lms_api.cursos.apps.CursosConfig",
-    'polls.apps.PollsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'lms_api.cursos.apps.CursosConfig',
+    'polls.apps.PollsConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
