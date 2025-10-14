@@ -25,9 +25,8 @@ SECRET_KEY = 'django-insecure-q7)*ao3lmw1!w-y6team+89(1+e$ly-^dcyp)&z4ac9eor3%57
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
+SITE_ID = 1
+ALLOWED_HOSTS = ["*"] 
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,9 +36,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'lms_api.cursos.apps.CursosConfig',
+    'lms_api.apps.LMSApiConfig',
     'polls.apps.PollsConfig',
     'rest_framework',
+    'drf_yasg',
+    'django_filters',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

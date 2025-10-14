@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class CursosConfig(AppConfig):
+class LMSApiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = "lms_api.cursos"
+    name = "lms_api"
+
