@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lms_api.apps.LMSApiConfig',
-    'polls.apps.PollsConfig',
     'rest_framework',
     'drf_yasg',
     'django_filters',
