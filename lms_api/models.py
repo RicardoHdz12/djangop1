@@ -15,15 +15,19 @@ class Profile(models.Model):
         return self.name
     
 class Course(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name="courses_taught")
-    title = models.CharField(max_length=200)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="courses")
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True, null=True) 
     description = models.TextField()
-    level = models.CharField(max_length=20)   
-    language = models.CharField(max_length=10)   
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    is_published = models.BooleanField(default=False)
+    level = models.CharField(max_length=50) 
+    language = models.CharField(max_length=50, default="es")
+    category = models.CharField(max_length=100, default="Tecnología")
+    what_you_will_learn = models.TextField(blank=True, null=True) 
+    requirements = models.TextField(blank=True, null=True)
+    target_audience = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    duration_hours = models.DecimalField(max_digits=5, decimal_places=1, default=1.0)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
@@ -51,7 +55,7 @@ class Enrollment(models.Model):
         max_length=10,
         default=STATUS_ACTIVE,
     ) 
-    progress_percent = models.PositiveSmallIntegerField(default=0)  
+    progress = models.IntegerField(default=0)
     enrolled_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

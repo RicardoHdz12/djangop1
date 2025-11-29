@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Mis cursos - LMS{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-4">Mis cursos</h2>
+
+<div class="row g-4">
+
+    {% for e in enrollments %}
+    <div class="col-sm-6 col-md-4">
+        <div class="card card-custom h-100 p-3 shadow-sm">
+
+            <h5 class="fw-bold mb-1">{{ e.course.title }}</h5>
+            {% if e.course.subtitle %}
+            <p class="text-muted mb-2 small">{{ e.course.subtitle }}</p>
+            {% endif %}
+
+            <p class="text-muted">{{ e.course.description|truncatechars:100 }}</p>
+
+            <div class="mb-3">
+                <span class="badge text-bg-dark me-1">{{ e.course.level }}</span>
+                <span class="badge text-bg-secondary">{{ e.course.language }}</span>
+            </div>
+
+            <div class="progress mb-3" style="height: 25px;">
+                <div class="progress-bar bg-success fw-bold"
+                    role="progressbar"
+                    aria-valuenow="{{ e.progress }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                    {{ e.progress }}%
+                </div>
+            </div>
+
+            <a href="{% url 'course_detail' e.course.id %}" class="btn btn-primary w-100 mt-auto">
+                Continuar curso
+            </a>
+
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted alert alert-info">Aún no estás inscrito en ningún curso. ¡Busca uno para empezar!</p>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

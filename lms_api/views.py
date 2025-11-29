@@ -9,7 +9,7 @@ from .serializers import (
     UserSerializer, ProfileSerializer, CourseSerializer,
     LessonSerializer, EnrollmentSerializer, CommentSerializer
 )
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -54,9 +54,12 @@ def registro_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data["password"])
+            user.is_active = False  
             user.save()
-            login(request, user)
-            return redirect("home")
+            # login(request, user) 
+            messages.success(request, "Revisa tu correo para activar tu cuenta.")
+            return redirect("login")
+
         else:
             messages.error(request, "Revisa los datos ingresados.")
     else:
@@ -90,7 +93,67 @@ def list_courses_ajax(request):
         "id", "title", "description", "level", "language"
     )
     return JsonResponse(list(courses), safe=False)
+@login_required
+def my_courses(request):
+    enrollments = Enrollment.objects.filter(user=request.user).select_related("course")
+    return render(request, "courses/my_courses.html", {"enrollments": enrollments})
 
+@login_required
+def course_detail(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    lessons = course.lessons.all()
+    enrolled = Enrollment.objects.filter(user=request.user, course=course).exists()
+
+    context = {
+        "course": course,
+        "lessons": lessons,
+        "enrolled": enrolled,
+    }
+    return render(request, "courses/detail.html", context)
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+@csrf_exempt
+@login_required
+@require_POST
+def enroll_course_ajax(request):
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        return JsonResponse({"error": "Solicitud inválida"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        course_id = data.get("course_id")
+        course = Course.objects.get(id=course_id)
+
+        enrollment, created = Enrollment.objects.get_or_create(
+            user=request.user,
+            course=course,
+            defaults={"status": "active"}
+        )
+
+        if not created:
+            return JsonResponse({"error": "Ya estás inscrito en este curso"}, status=400)
+
+        return JsonResponse(
+            {"status": "ok", "course_title": course.title},
+            status=201
+        )
+    except Course.DoesNotExist:
+        return JsonResponse({"error": "Curso no encontrado"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def activate_account(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_active = True
+        user.save()
+        messages.success(request, "Tu cuenta ha sido activada. Ya puedes iniciar sesión.")
+        return redirect("login")
+    except User.DoesNotExist:
+        messages.error(request, "El enlace de activación no es válido.")
+        return redirect("welcome")
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

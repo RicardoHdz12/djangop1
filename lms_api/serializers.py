@@ -18,7 +18,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["id", "user", "user_info", "name", "role", "bio", "avatar", "created_at", "updated_at"]
-        read_only_fields = ["id", "user", "created_at", "updated_at"]
+        read_only_fields = ["id", "user", "created_at"]
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -27,15 +27,11 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ["id","owner","owner_info", "title", "description", "level","language","price","is_published","created_at", "updated_at",]
-        read_only_fields = ["id", "owner", "created_at", "updated_at"]
-
-    def validate_level(self, value):
-        allowed = {"beginner", "intermediate", "advanced"}
-        if value not in allowed:
-            raise serializers.ValidationError(f"Level must be one of {allowed}.")
-
-        return value
+        fields = [
+            "id","owner","owner_info","title","subtitle","description","level","language","category",
+            "what_you_will_learn","requirements","target_audience","price","duration_hours","created_at",
+        ]
+        read_only_fields = ["id","owner","created_at"]
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -50,17 +46,16 @@ class LessonSerializer(serializers.ModelSerializer):
 class EnrollmentSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     user_info = UserSerializer(source="user", read_only=True)
-
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-
     status = serializers.ChoiceField(choices=["active", "completed", "canceled"], default="active")
 
     class Meta:
         model = Enrollment
         fields = [
-            "id","user","user_info","course", "status","progress_percent","enrolled_at", "updated_at",
+            "id","user","user_info","course","status","progress","enrolled_at","updated_at",
         ]
-        read_only_fields = ["id", "user", "enrolled_at", "updated_at"]
+        read_only_fields = ["id","user","enrolled_at","updated_at"]
+
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)

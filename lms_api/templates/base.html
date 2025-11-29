@@ -56,11 +56,15 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container">
-    <a class="navbar-brand" href="/">LMS</a>
-
+    {% if user.is_authenticated %}
+        <a class="navbar-brand" href="{% url 'home' %}">LMS</a>
+    {% else %}
+        <a class="navbar-brand" href="{% url 'welcome' %}">LMS</a>
+    {% endif %}
     <div>
       {% if user.is_authenticated %}
         <a href="/perfil/" class="btn btn-light btn-sm me-2">Mi Perfil</a>
+        <a href="{% url 'my_courses' %}" class="btn btn-light btn-sm me-2">Mis cursos</a>
         <a href="/logout/" class="btn btn-accent btn-sm">Salir</a>
       {% else %}
         <a href="/login/" class="btn btn-light btn-sm">Iniciar sesión</a>

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+    <div class="row mb-4">
+
+        <div class="col-md-8">
+
+            <h1 class="fw-bold">{{ course.title }}</h1>
+
+            {% if course.subtitle %}
+            <p class="text-muted fs-5">{{ course.subtitle }}</p>
+            {% endif %}
+
+            <p class="lead text-muted">
+                {{ course.description|truncatewords:30 }}
+            </p>
+
+            <div class="mb-2">
+                <span class="badge bg-dark me-1">{{ course.level }}</span>
+                <span class="badge bg-secondary me-1">{{ course.language }}</span>
+                <span class="badge bg-info text-dark">{{ course.category }}</span>
+            </div>
+
+            <p class="mt-2">
+                <strong>Instructor: </strong>{{ course.owner.username }}
+            </p>
+
+            <p class="text-muted">
+                 {{ lessons|length }} lecciones · Actualizado {{ course.created_at|date:"M Y" }}  
+                · {{ course.duration_hours }} horas de contenido
+            </p>
+
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm">
+
+                {% if enrolled %}
+
+                    <a href="{% url 'my_courses' %}" class="btn btn-success btn-lg w-100 mb-3">
+                        Continuar curso
+                    </a>
+
+                    <!-- Barra de progreso -->
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             aria-valuenow="{{ enrollment.progress }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            {{ enrollment.progress }}%
+                        </div>
+                    </div>
+
+                    <span class="text-success fw-bold">
+                         Ya estás inscrito
+                    </span>
+
+                {% else %}
+
+                    <!-- Precio del curso -->
+                    <h3 class="fw-bold mb-3">
+                        ${{ course.price }}
+                    </h3>
+
+                    <!-- Botón comprar e inscribir -->
+                    <button onclick="inscribir('{{ course.id }}')"
+                    class="btn btn-primary btn-lg w-100 mb-3">
+                    Comprar e inscribirme
+                </button>
+
+                {% endif %}
+
+                <hr>
+
+                <!-- Beneficios del curso -->
+                <p class="small text-muted mb-1">Incluye:</p>
+                <ul class="small">
+                    <li>Acceso de por vida</li>
+                    <li>Contenido actualizado</li>
+                    <li>Certificado al finalizar</li>
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LO QUE APRENDERÁS -->
+    {% if course.what_you_will_learn %}
+        <h3 class="fw-bold">Lo que aprenderás</h3>
+        <div class="row mb-4">
+            {% for item in course.what_you_will_learn.splitlines %}
+                <div class="col-md-6 mb-1">
+                    ✓ {{ item }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- REQUISITOS -->
+    {% if course.requirements %}
+        <h3 class="fw-bold">Requisitos</h3>
+        <ul class="mb-4">
+            {% for req in course.requirements.splitlines %}
+                <li>{{ req }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- A QUIÉN VA DIRIGIDO -->
+    {% if course.target_audience %}
+        <h3 class="fw-bold">¿A quién va dirigido?</h3>
+        <ul class="mb-4">
+            {% for t in course.target_audience.splitlines %}
+                <li>{{ t }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- CONTENIDO DEL CURSO -->
+    <h3 class="fw-bold">Contenido del curso</h3>
+    <div class="accordion" id="courseAccordion">
+
+        {% for lesson in lessons %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ forloop.counter }}">
+                    {{ lesson.title }}
+                </button>
+            </h2>
+
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse">
+                <div class="accordion-body">
+
+                    <p>{{ lesson.content }}</p>
+
+                    {% if lesson.video_url %}
+                        <a href="{{ lesson.video_url }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-primary">
+                            Ver video
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script>
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function inscribir(courseId) {
+    fetch("{% url 'ajax_enroll_course' %}", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ course_id: courseId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === "ok") {
+            window.location.reload();
+        } else {
+            alert(data.error);
+        }
+    });
+}
+</script>
+
+{% endblock %}
